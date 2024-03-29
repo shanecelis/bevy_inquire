@@ -1,15 +1,55 @@
 use std::fmt::Display;
 use std::io::Result;
 use std::io::Write;
+use inquire::error::InquireResult;
+use inquire::InquireError;
 use inquire::terminal::{Terminal, TerminalSize};
-use inquire::ui::Styled;
+use inquire::ui::{Key, Styled, KeyModifiers, InputReader};
 mod text_style_adapter;
 
 use text_style_adapter::StyledStringWriter;
+use bevy::prelude::*;
 
-struct BevyTerminal {
+#[derive(Component)]
+pub struct BevyTerminal {
     size: TerminalSize,
     writer: StyledStringWriter,
+}
+
+impl Default for BevyTerminal {
+    fn default() -> Self {
+        Self {
+            size: TerminalSize::new(24, 80),// { width: 80, height: 24 },
+            writer: StyledStringWriter::default()
+        }
+    }
+}
+
+pub struct BevyInput {
+    keys: Vec<Key>,
+}
+
+pub fn from_input(input: &ButtonInput<KeyCode>) -> KeyModifiers {
+    let mut mods = KeyModifiers::empty();
+    if input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+        mods |= KeyModifiers::SHIFT;
+    }
+    if input.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]) {
+        mods |= KeyModifiers::CONTROL;
+    }
+    if input.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]) {
+        mods |= KeyModifiers::ALT;
+    }
+    if input.any_pressed([KeyCode::SuperLeft, KeyCode::SuperRight]) {
+        mods |= KeyModifiers::SUPER;
+    }
+    mods
+}
+
+impl InputReader for BevyInput {
+    fn read_key(&mut self) -> InquireResult<Key> {
+        self.keys.pop().ok_or(InquireError::OperationCanceled)
+    }
 }
 
 impl Terminal for BevyTerminal {
