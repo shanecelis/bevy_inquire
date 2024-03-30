@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.13.1"
-inquire = { version = "0.6.2", path = "../inquire/inquire", default-features = false, features = [ "crossterm" ] }
+inquire = { version = "0.7.4", path = "../inquire/inquire", default-features = false, features = [ "crossterm" ] }
 itertools = "0.12.1"
